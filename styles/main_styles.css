@@ -656,7 +656,7 @@ section
 	text-transform: uppercase;
 	margin-bottom: 29px;
 	margin-left: 100px;
-	color: #111111;
+	color: #ded7d7;
 	text-shadow: 5px 5px 5px #000;
 	font-size: 20px;
 	-webkit-animation:slide-in-left .5s cubic-bezier(.25,.46,.45,.94) both;animation:slide-in-left .5s cubic-bezier(.25,.46,.45,.94) both;
