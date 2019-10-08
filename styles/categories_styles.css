@@ -1156,6 +1156,7 @@ section
 .product_image img
 {
 	width: 100%;
+	height: 160px;
 }
 .product_info
 {
