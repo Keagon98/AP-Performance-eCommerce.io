@@ -1,79 +1,92 @@
-if (document.readyState == 'loading') {
-    document.addEventListener('DOMContentLoaded', ready)
-} else {
-    ready()
-}
+// The shopping cart
+let cart = [];
+    
+// Returns an array of products
+const getProducts = () => {
+  return [...products];
+};
 
-function ready() {
-    var removeCartItemButtons = document.getElementsByClassName('btn-outline-danger')
-    for (var i = 0; i < removeCartItemButtons.length; i++) {
-        var button = removeCartItemButtons[i]
-        button.addEventListener('click', removeCartItem) 
-}
+// Checks for a product with 'id' and returns it
+const getProductById = id => {
+  id = +id || null;
+  return (id) ? products.filter(item => item.id === id)[0] : null;
+};
 
-    var quantityInputs = document.getElementsByClassName('form-control')
-    for (var i = 0; i < quantityInputs.length; i++) {
-        var input = quantityInputs[i]
-        input.addEventListener('change', quantityChanged)
-}
+// Returns the shopping cart (array of product id's)
+const getCart = () => {
+  return [...cart];
+};
 
-    var addToCartbuttons  = document.getElementsByClassName('red_button add_to_cart_button')
-    for (var i = 0; i < addToCartbuttons.length; i++) {
-        var button = addToCartbuttons[i]
-        button.addEventListener('click', addToCartClicked)
+// Used to add or remove an item from the shopping cart
+const modifyCart = (method, id) => {
+  // Adding an item
+  if(method === 'add') {
+    // Check the the item they want to add is actually a shop item
+    if(cart.indexOf(id) === -1) {
+      // Push the item into the shopping cart
+      cart.push(id);
+      
+      // Update the localStorage with the new cart
+      localStorage.setItem('cart', JSON.stringify({items: getCart()}));
+      
+      // Emit an event to let everyone know the cart was updated
+      Events.emit('cartupdated', getCart());
+      
+      return true;
     }
-}
-
-function removeCartItem(event) {
-      var buttonClicked = event.target
-            buttonClicked.parentElement.parentElement.remove()
-            updateCartTotal()
-}
-
-function quantityChanged(event) {
-    var input = event.target
-    if (isNaN(input.value) || input.value <= 0) {
-        input.value = 1
+    
+  // Removing an item
+  } else if(method === 'remove') {
+    // Check if the item they want to add is actually a shop item
+    if(cart.indexOf(id) !== -1) {
+      // Remove the item from the cart
+      cart.splice(cart.indexOf(id), 1);
+      
+      // Update the localStorage with the new cart
+      localStorage.setItem('cart', JSON.stringify({items: getCart()}));
+      
+      // Emit an event to let everyone know the cart was updated
+      Events.emit('cartupdated', getCart());
+      
+      return true;
     }
-    updateCartTotal()
-}
-
-function addToCartClicked(event) {
-    var button = event.target
-    var shopItem = button.parentElement.parentElement
-    var title = shopItem.getElementsByClassName('product_name')[0].innerText
-    var price = shopItem.getElementsByClassName('product_price')[0].innerText
-    var imageSrc = shopItem.getElementsByClassName('product-image')[0].src
-    console.log(title, price, imageSrc)
-    addItemToCart(title, price, imageSrc)
-}
-
-function addItemToCart(title, price, imageSrc) {
-    var cartRow = document.createElement('div')
-    cartRow.innerText = title
-    var cartItems = document.getElementsByClassName('product-item')[0]
-    cartItems.append(cartRow)
-}
-
-function updateCartTotal() {
-    var cartItemContainer = document.getElementsByClassName('product-item')[0]
-    var cartRows = cartItemContainer.getElementsByClassName('cart-row')
-    var total = 0
-   for (var i = 0; i < cartRows.length; i++) {
-        var cartRow = cartRows[i]
-        var priceElement = cartRow.getElementsByClassName('cart-price')[0]
-        var quantityElement = cartRow.getElementsByClassName('form-control text-center')[0]
-        var price = parseFloat(priceElement.innerText.replace('R', ''))
-        var quantity = quantityElement.value
-        total = total + (price * quantity)
-    }
-    total = Math.round(total * 100) / 100
-    document.getElementsByClassName('cart-total-price')[0].innerText = 'R' + total
-}
-
-function myFunction() {
-    alert("Item added to cart");
   }
+  
+  return false;
+};
+
+// Initializes the shopping cart
+const initCart = () => {
+  // Check if localStorage is available
+  if('localStorage' in window) {
+    // Get the cart stored in localStorage
+    let storedCart = JSON.parse(localStorage.getItem('cart'));
+    
+    // Did we find an existing cart?
+    if(storedCart) {
+      // Cool, set the stored cart equal to our app cart
+      cart = storedCart.items;
+    } else {
+      // Otherwise, create a new localStorage item for our cart
+      localStorage.setItem('cart', JSON.stringify({items: getCart()}));
+    }
+  }
+  
+  // Tell everyone we've updated the cart
+  Events.emit('cartupdated', getCart());
+};
+
+return {
+  getCart,
+  modifyCart,
+  initCart,
+  getProducts,
+  getProductById
+};
+
+
+
+
 
 
 
